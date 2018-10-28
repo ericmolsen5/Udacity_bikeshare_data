@@ -2,13 +2,15 @@ import time
 import pandas as pd
 import numpy as np
 
-# TODO: shorten the decimal outputs here and in the rest of the program
-
 CITY_DATA = { 'chicago': 'chicago.csv',
               'new york city': 'new_york_city.csv',
               'washington': 'washington.csv' }
 
 THIS_YEAR = 2018
+
+# This is probably a bad coding practice which I"m used to from Java
+# I had to learn how to use the global keyword to make this work
+user_data_available = True
 
 def int_to_month(num):
     # function that simplifies printing month integers to the console
@@ -47,6 +49,11 @@ def get_filters():
     while True:
         city = input().lower()
         if city == 'chicago' or city == 'new york city' or city == 'washington':
+            global user_data_available
+            if city == 'washington':
+                user_data_available = False  # Helps avoid a user query to Washington data
+            else:
+                user_data_available = True # this will reset the query if data is reloaded
             print("You selected ", city.title())
             break
         else:
@@ -124,8 +131,8 @@ def get_filters():
     print('-'*40)
     return city, month, day
 
+
 def load_data(city, month, day):
-    # I borrowed a bit from Exercise 3 of the class material here
 
     df = pd.read_csv(CITY_DATA[city]) #start by reading the correct csv
 
@@ -186,23 +193,23 @@ def station_stats(df):
     start = (df['Start Station'].mode()[0])
     end = (df['End Station'].mode()[0])
 
-    # display most frequent combination of start station and end station trip
+    # add a column to track start-stop combinations
+    # Since this is already wrangled we should have the same String values to combine
+    df['Route'] = df['Start Station'] + ' -to- ' + df['End Station']
+    pop_route = df['Route'].mode()[0]
     #TODO: add the count in its own column instead of using a mislabeled one
-    # sum_routes = df.groupby(['Start Station', 'End Station'])['Route Cnt'].value_counts()
 
 
 
     print("The most commonly used start location is: \n{}\n".format(start))
     print("The most commonly used end location is: \n{}\n".format(end))
-    # print("The most popular route is: \n{}\n".format(sum_routes.head()))
-    print("***missing most common trip****")
+    print("The most popular route is: \n{}\n".format(pop_route))
 
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
 
 def trip_duration_stats(df):
     # """Displays statistics on the total and average trip duration."""
-    #
     print('\nCalculating Trip Duration...\n')
     start_time = time.time()
 
@@ -223,14 +230,14 @@ def trip_duration_stats(df):
     print('-'*40)
 
 def user_stats(df):
-    # """Displays statistics on bikeshare users."""
+    # Displays statistics on bikeshare users
     print('\nCalculating User Stats...\n')
     start_time = time.time()
 
-    # # Display counts of user types
+    # Display counts of user types
     user_type_cnt = df['User Type'].value_counts()
     user_gender_cnt = df['Gender'].value_counts()
-    # # Display earliest, most recent, and most common year of birth
+    # Display earliest, most recent, and most common year of birth
     oldest_rider = df['Birth Year'].min()
     youngest_rider = df['Birth Year'].max()
     most_common_rider_age = df['Birth Year'].mean()
@@ -244,10 +251,10 @@ def user_stats(df):
     print("Average rider age / most common year of birth): \n{} / {}\n".format(
     int(THIS_YEAR - most_common_rider_age), int(most_common_rider_age)))
 
-
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
 
+# Lets the user hit one key to got through the data 5 entries at a time
 def step_through_data(df):
     cnt = 0
     print(df.head())
@@ -309,8 +316,14 @@ type 'q' to quit
                 trip_duration_stats(df)
                 continue
             elif selection == '4':
-                user_stats(df)
-                continue
+                global user_data_available
+                if user_data_available == True:
+                    user_stats(df)
+                    continue
+                else:
+                    print("There is currently no user data available for your city")
+                    print("Please select a different option")
+                    continue
             elif selection == '5':
                 #TODO build a function that uses a counter and the head() method and its own loop for control
                 step_through_data(df)
@@ -325,6 +338,27 @@ type 'q' to quit
 
         restart = input('\nWould you like to query new data? Enter yes or no.\n')
         if restart.lower() != 'yes':
+            goodbye= """
+            GOODBYE!!!!
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+░░░░░░░▄▄▀▀▀▀▀▀▀▀▀▀▄▄█▄░░░░▄░░░░█░░░░░░░
+░░░░░░█▀░░░░░░░░░░░░░▀▀█▄░░░▀░░░░░░░░░▄░
+░░░░▄▀░░░░░░░░░░░░░░░░░▀██░░░▄▀▀▀▄▄░░▀░░
+░░▄█▀▄█▀▀▀▀▄░░░░░░▄▀▀█▄░▀█▄░░█▄░░░▀█░░░░
+░▄█░▄▀░░▄▄▄░█░░░▄▀▄█▄░▀█░░█▄░░▀█░░░░█░░░
+▄█░░█░░░▀▀▀░█░░▄█░▀▀▀░░█░░░█▄░░█░░░░█░░░
+██░░░▀▄░░░▄█▀░░░▀▄▄▄▄▄█▀░░░▀█░░█▄░░░█░░░
+██░░░░░▀▀▀░░░░░░░░░░░░░░░░░░█░▄█░░░░█░░░
+██░░░░░░░░░░░░░░░░░░░░░█░░░░██▀░░░░█▄░░░
+██░░░░░░░░░░░░░░░░░░░░░█░░░░█░░░░░░░▀▀█▄
+██░░░░░░░░░░░░░░░░░░░░█░░░░░█░░░░░░░▄▄██
+░██░░░░░░░░░░░░░░░░░░▄▀░░░░░█░░░░░░░▀▀█▄
+░▀█░░░░░░█░░░░░░░░░▄█▀░░░░░░█░░░░░░░▄▄██
+░▄██▄░░░░░▀▀▀▄▄▄▄▀▀░░░░░░░░░█░░░░░░░▀▀█▄
+░░▀▀▀▀░░░░░░░░░░░░░░░░░░░░░░█▄▄▄▄▄▄▄▄▄██
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+            """
+            print(goodbye)
             break
 
 if __name__ == "__main__":
