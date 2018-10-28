@@ -6,6 +6,33 @@ CITY_DATA = { 'chicago': 'chicago.csv',
               'new york city': 'new_york_city.csv',
               'washington': 'washington.csv' }
 
+def int_to_month(num):
+    if num == 1:
+        return 'January'
+    elif num == 2:
+        return 'February'
+    elif num == 3:
+        return 'March'
+    elif num == 4:
+        return 'April'
+    elif num == 5:
+        return 'May'
+    elif num == 6:
+        return 'June'
+    elif num == 7:
+        return 'July'
+    elif num == 8:
+        return 'August'
+    elif num == 9:
+        return 'September'
+    elif num == 10:
+        return 'October'
+    elif num == 11:
+        return 'November'
+    elif num == 12:
+        return 'December'
+    else:
+        return num
 
 #TODO: comeback and make this data input a little more versatile and human readable
 def get_filters():
@@ -23,7 +50,7 @@ def get_filters():
             print("Please type 'Chicago, New York City, and Washington.'")
             continue
 
-    print("Please type your desired month by name or number (ex: 'January' or '1')")
+    print("Please type your desired month by name or number (ex: 'January' or '1') or 'all'")
     while True:
         month = input()
         # if this were C++ or Java, I'd vote for a switch statement.
@@ -62,7 +89,7 @@ def get_filters():
         break
 
     print("Please enter a number for your desired day of the week")
-    print("Choose from the following: Su, M, Tu, W, Th, F, Sa, or Any")
+    print("Choose from the following: Su, M, Tu, W, Th, F, Sa, or All")
     while True:
         day = input()
         if day.lower() == 'su' or day == '1':
@@ -79,55 +106,15 @@ def get_filters():
             day = 'Friday'
         elif day.lower() == 'sa' or day == '7':
             day = 'Saturday'
-        elif day.lower() == 'any':
-            day = 'any'
+        elif day.lower() == 'all':
+            day = 'all'
         else:
             print("It appears you picked a day outside our weekly range: ", day)
-            print("Please choose from the following: Su, M, Tu, W, Th, F, Sa, or Any")
+            print("Please choose from the following: Su, M, Tu, W, Th, F, Sa, or All")
             continue
         print("You selected day: ", day)
         break
 
-#     good_str = """
-# ┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌
-# ┌┌┌┌┌┌┌┌┌┌┌█████┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌
-# ┌┌┌┌┌┌┌┌┌┌███████┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌
-# ┌┌┌┌┌┌┌┌┌███┌┌┌██┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌
-# ┌┌┌┌┌┌┌┌┌██┌┌┌┌██┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌
-# ┌┌┌┌┌┌┌┌███┌┌┌┌███┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌
-# ┌┌┌┌┌┌┌┌███┌┌┌┌███┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌
-# ┌┌┌┌┌┌┌┌┌██┌┌┌┌┌███┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌
-# ┌┌┌┌┌┌┌┌┌███┌┌┌┌┌███┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌
-# ┌┌┌┌┌┌┌┌┌┌███┌┌┌┌┌████┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌
-# ┌┌┌┌┌┌┌┌┌┌┌██┌┌┌┌┌┌████┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌
-# ┌┌┌┌┌┌┌┌┌┌┌███┌┌┌┌┌┌┌███┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌
-# ┌┌┌┌┌┌┌┌┌┌┌┌███┌┌┌┌┌┌┌███┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌
-# ┌┌┌┌┌┌┌┌┌┌┌┌███┌┌┌┌┌┌┌┌███┌┌┌┌┌┌┌┌┌┌┌┌┌┌
-# ┌┌┌┌┌┌┌┌┌┌┌┌┌██┌┌┌┌┌┌┌┌┌┌███┌┌┌┌┌┌┌┌┌┌┌┌
-# ┌┌┌┌┌┌┌┌┌███┌███┌┌┌┌┌┌┌┌┌┌██┌┌┌┌┌┌┌┌┌┌┌┌
-# ┌┌┌┌████████████┌┌┌┌┌┌┌┌┌┌┌███┌┌┌┌┌┌┌┌┌┌
-# ┌┌████████┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌███┌┌┌┌┌┌┌┌┌
-# ┌███┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌█████████┌┌
-# ███┌┌┌┌█████████┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌█████┌
-# ██┌┌┌███████┌████┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌███┌
-# ██┌┌┌┌███┌┌┌┌┌┌┌███┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌██┌
-# ███┌┌┌┌┌┌┌┌┌┌┌█████┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌██┌
-# ┌███┌┌┌┌┌┌┌████████┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌██┌
-# ┌┌████████████┌┌┌████┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌██┌
-# ┌███┌██████┌┌┌┌┌┌┌████┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌██┌
-# ┌███┌┌┌┌┌┌┌┌┌┌┌██████┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌██┌
-# ┌┌████┌████┌██████████┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌██┌
-# ┌┌┌████████████┌┌┌┌┌███┌┌┌┌┌┌┌┌┌┌┌┌┌███┌
-# ┌┌┌┌██┌┌┌┌┌┌┌┌┌┌┌███████┌┌┌┌┌┌┌███████┌┌
-# ┌┌┌┌████┌┌┌┌┌┌████████┌┌┌┌┌┌┌┌████████┌┌
-# ┌┌┌┌┌████████████┌┌┌███┌┌┌┌┌███┌┌┌┌┌┌┌┌┌
-# ┌┌┌┌┌┌┌┌███┌█┌█┌┌┌┌┌┌███┌┌┌███┌┌┌┌┌┌┌┌┌┌
-# ┌┌┌┌┌┌┌┌███┌┌┌┌┌┌█████┌┌█████┌┌┌┌┌┌┌┌┌┌┌
-# ┌┌┌┌┌┌┌┌┌██████████████████┌┌┌┌┌┌┌┌┌┌┌┌┌
-# ┌┌┌┌┌┌┌┌┌┌██████████████┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌
-# ┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌┌
-#     """
-    # print(good_str)
     print("You provided: ", city, " | ", month, " | ", day)
     print('-'*40)
     return city, month, day
@@ -159,58 +146,83 @@ def load_data(city, month, day):
     # now we'll create a day_of_week column
     df['day_of_week'] = df['Start Time'].dt.weekday_name
 
-    # we need some way of deconflicting the string month to np integer month
-    months = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
-        'August', 'September', 'October', 'November', 'December']
-    num_month = months.index(month) + 1
 
     # Now we'll refine the dataframe by selected month
     if month != 'all':  #this should leave the dataframe unfiltered by month
+        # we need some way of deconflicting the string month to np integer month
+        months = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+        'August', 'September', 'October', 'November', 'December']
+        num_month = months.index(month) + 1
+
         df = df[df['month'] == num_month]
 
     # Now we'll filter by weekday_name
-    if day != 'any': # don't filter anything if 'any' was selected
+    if day != 'all': # don't filter anything if 'any' was selected
         df = df[df['day_of_week'] == day.title()]
 
     return df
 
-
-# def time_stats(df):
+def time_stats(df):
     # """Displays statistics on the most frequent times of travel."""
-    #
-    # print('\nCalculating The Most Frequent Times of Travel...\n')
-    # start_time = time.time()
-    #
-    # # display the most common month
-    #
-    #
-    # # display the most common day of week
-    #
-    #
-    # # display the most common start hour
-    #
-    #
-    # print("\nThis took %s seconds." % (time.time() - start_time))
-    # print('-'*40)
 
+    start_time = time.time()
+    print('\nCalculating The Most Frequent Times of Travel...\n')
 
-# def station_stats(df):
+    # display the most common month, if we only queried one month, this is not
+    # very significant
+    num_months = len(df['month'].unique())
+    print("This data has {} total months.".format(num_months))
+    popular_month = df['month'].mode()[0]
+    #TODO: make it spell a month rather than number
+    print("The most popular month, given our query, is {}.".format(int_to_month(popular_month)))
+
+    # most common day, same implications as month
+    num_days = len(df['day_of_week'].unique())
+    print("\nThis data has {} different days of the week.".format(num_days))
+    popular_day = df['day_of_week'].mode()[0]
+    print("The most popular day, given our query, is {}.".format(popular_day))
+
+    # most common start hour
+    popular_start_hour = df['Start Time'].mode()[0]
+    print("\nThe most popular starting hours is {}.".format(popular_start_hour))
+    print("*********bug: display as a single hour*****************")
+
+    print("\nThis query took %s seconds." % (time.time() - start_time))
+    print('-'*40)
+
+def most_pop_route(df):
+    # show the most popular most_pop_route
+    start_time = time.time()
+
+    sum_routes = df.groupby(['Start Station', 'End Station']).nunique()
+    print(sum_routes.describe())
+    # print("most common: ", sum_routes['Unnamed'].mode()[0])
+    # print("The most popular route is {}.".format(pop_route))
+
+    print("\nThis query took %s seconds." % (time.time() - start_time))
+
+def station_stats(df):
     # """Displays statistics on the most popular stations and trip."""
     #
-    # print('\nCalculating The Most Popular Stations and Trip...\n')
-    # start_time = time.time()
+    print('\nCalculating The Most Popular Stations and Trip...\n')
+    start_time = time.time()
 
     # display most commonly used start station
-
+    start = (df['Start Station'].mode()[0])
+    print("The most commonly used start location is {}.".format(start))
 
     # display most commonly used end station
-
+    end = (df['Start Station'].mode()[0])
+    print("\nThe most commonly used end location is {}.".format(end))
 
     # display most frequent combination of start station and end station trip
+    sum_routes = df.groupby(['Start Station', 'End Station'])['Trip Duration'].count()
+    # pop_route = sum_routes.head(1)
+    print("\nThe most popular route is {}.".format(sum_routes.head(1)))
+    print("*****bug: table needs correct sorting enabled***************")
 
-    #
-    # print("\nThis took %s seconds." % (time.time() - start_time))
-    # print('-'*40)
+    print("\nThis took %s seconds." % (time.time() - start_time))
+    print('-'*40)
 
 
 # def trip_duration_stats(df):
@@ -269,20 +281,45 @@ def main():
         city, month, day = get_filters()
         # create a filtered Pandas dataframe with a string, string, string parameters
         df = load_data(city, month, day)
+        print("Data successfully queried.")
+        instructions ="""
+Please select what operation comes next:
+1.) Show time stats
+2.) Show Sation Stats
+3.) Show Rider Age Breakout
+4.) Show Trip Duration Breakout
+5.) Show User Stats
+type 'q' to quit
+"""
+        while True:
+            print(instructions)
+            selection = input()
+            if selection.lower() == 'q':
+                break
+            elif selection == '1':
+                time_stats(df)
+                continue
+            elif selection == '2':
+                station_stats(df)
+                continue
+            else:
+                print("It looks like we received an unexpected input: ", selection)
+                print("Please re-enter your number selection or htt q to quit")
+                continue
 
         #TODO: ask user for
-        #1) Most popular route
-        #2) Rider Age breakout
-        #3) Trip duration breakout
-        #4) User Stats: Type | Gender | Oldest, youngest, and most common age | Time to execute
 
-        # time_stats(df)
+        #3) Rider Age breakout
+        #4) Trip duration breakout
+        #5) User Stats: Type | Gender | Oldest, youngest, and most common age | Time to execute
+
         # station_stats(df)
         # trip_duration_stats(df)
         # user_stats(df)
-        print(df)
 
-        restart = input('\nWould you like to restart? Enter yes or no.\n')
+        # print(df)
+
+        restart = input('\nWould you like to query new data? Enter yes or no.\n')
         if restart.lower() != 'yes':
             break
 
