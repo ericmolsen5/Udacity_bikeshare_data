@@ -2,11 +2,16 @@ import time
 import pandas as pd
 import numpy as np
 
+# TODO: shorten the decimal outputs here and in the rest of the program
+
 CITY_DATA = { 'chicago': 'chicago.csv',
               'new york city': 'new_york_city.csv',
               'washington': 'washington.csv' }
 
+THIS_YEAR = 2018
+
 def int_to_month(num):
+    # function that simplifies printing month integers to the console
     if num == 1:
         return 'January'
     elif num == 2:
@@ -34,12 +39,11 @@ def int_to_month(num):
     else:
         return num
 
-#TODO: comeback and make this data input a little more versatile and human readable
 def get_filters():
     print('Hello! Let\'s explore some US bikeshare data!')
     print('We have data for Chicago, New York City, and Washington.')
     print('Please type one of these cities.')
-    # get user input for city (chicago, new york city, washington). HINT: Use a while loop to handle invalid inputs
+
     while True:
         city = input().lower()
         if city == 'chicago' or city == 'new york city' or city == 'washington':
@@ -51,6 +55,7 @@ def get_filters():
             continue
 
     print("Please type your desired month by name or number (ex: 'January' or '1') or 'all'")
+    print("Note: Data is only available between January and June")
     while True:
         month = input()
         # if this were C++ or Java, I'd vote for a switch statement.
@@ -89,7 +94,7 @@ def get_filters():
         break
 
     print("Please enter a number for your desired day of the week")
-    print("Choose from the following: Su, M, Tu, W, Th, F, Sa, or All")
+    print("Choose from the following: Su / 1, M / 2, Tu / 3, W / 4, Th / 5, F / 6, Sa / 7, or All")
     while True:
         day = input()
         if day.lower() == 'su' or day == '1':
@@ -115,150 +120,147 @@ def get_filters():
         print("You selected day: ", day)
         break
 
-    print("You provided: ", city, " | ", month, " | ", day)
+    print("Input is valid, you provided: ", city, " | ", month, " | ", day)
     print('-'*40)
     return city, month, day
 
-# I borrowed a bit from Exercise 3 of the class material here
 def load_data(city, month, day):
-    # """
-    # Loads data for the specified city and filters by month and day if applicable.
-    #
-    # Args:
-    #     (str) city - name of the city to analyze
-    #     (str) month - name of the month to filter by, or "all" to apply no month filter
-    #     (str) day - name of the day of week to filter by, or "all" to apply no day filter
-    # Returns:
-    #     df - Pandas DataFrame containing city data filtered by month and day
-    # """
+    # I borrowed a bit from Exercise 3 of the class material here
 
-    #start by reading the correct csv
-    df = pd.read_csv(CITY_DATA[city])
+    df = pd.read_csv(CITY_DATA[city]) #start by reading the correct csv
 
-    # now we'll need to convert our Start Time column strings into Pandas DateTime objects
+    # now we convert our Start Time column strings into Pandas DateTime objects
     df['Start Time'] = pd.to_datetime(df['Start Time'])
 
-    # now we'll create a month column from the start-time column
+    # now we create a month column from the start-time column
     # this might create a negligible  inconsistency with our midnight riders on
     # the last day of the month
     df['month'] = df['Start Time'].dt.month
 
-    # now we'll create a day_of_week column
+    # now we create a day_of_week column
     df['day_of_week'] = df['Start Time'].dt.weekday_name
 
-
-    # Now we'll refine the dataframe by selected month
+    # refine the dataframe by selected month
     if month != 'all':  #this should leave the dataframe unfiltered by month
-        # we need some way of deconflicting the string month to np integer month
+        # deconflicting the string month to np integer month
         months = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
         'August', 'September', 'October', 'November', 'December']
         num_month = months.index(month) + 1
 
         df = df[df['month'] == num_month]
 
-    # Now we'll filter by weekday_name
+    # Now we also filter by weekday_name
     if day != 'all': # don't filter anything if 'any' was selected
         df = df[df['day_of_week'] == day.title()]
 
+    #data frame is complete and ready for further queries
     return df
 
 def time_stats(df):
-    # """Displays statistics on the most frequent times of travel."""
 
     start_time = time.time()
     print('\nCalculating The Most Frequent Times of Travel...\n')
 
-    # display the most common month, if we only queried one month, this is not
-    # very significant
+    # display the most common month, if we only queried one month, this is not very significant
     num_months = len(df['month'].unique())
-    print("This data has {} total months.".format(num_months))
-    popular_month = df['month'].mode()[0]
-    #TODO: make it spell a month rather than number
-    print("The most popular month, given our query, is {}.".format(int_to_month(popular_month)))
-
-    # most common day, same implications as month
+    popular_month = df['month'].mode()[0] #shows month with the highest count
+    # not very significant if we only queried one day
     num_days = len(df['day_of_week'].unique())
-    print("\nThis data has {} different days of the week.".format(num_days))
     popular_day = df['day_of_week'].mode()[0]
-    print("The most popular day, given our query, is {}.".format(popular_day))
+    popular_start_hour = df['Start Time'].mode()[0].hour
 
-    # most common start hour
-    popular_start_hour = df['Start Time'].mode()[0]
-    print("\nThe most popular starting hours is {}.".format(popular_start_hour))
-    print("*********bug: display as a single hour*****************")
+    print("Total months in data: \n{}\n".format(num_months))
+    print("Most popular month: \n{}\n".format(int_to_month(popular_month)))
+    print("Total days in data: \n{}\n".format(num_days))
+    print("Most popular day: \n{}\n".format(popular_day))
+    print("Most popular starting hour: \n{}\n".format(popular_start_hour))
 
     print("\nThis query took %s seconds." % (time.time() - start_time))
     print('-'*40)
 
-def most_pop_route(df):
-    # show the most popular most_pop_route
-    start_time = time.time()
-
-    sum_routes = df.groupby(['Start Station', 'End Station']).nunique()
-    print(sum_routes.describe())
-    # print("most common: ", sum_routes['Unnamed'].mode()[0])
-    # print("The most popular route is {}.".format(pop_route))
-
-    print("\nThis query took %s seconds." % (time.time() - start_time))
-
 def station_stats(df):
-    # """Displays statistics on the most popular stations and trip."""
-    #
+
     print('\nCalculating The Most Popular Stations and Trip...\n')
     start_time = time.time()
 
-    # display most commonly used start station
     start = (df['Start Station'].mode()[0])
-    print("The most commonly used start location is {}.".format(start))
-
-    # display most commonly used end station
-    end = (df['Start Station'].mode()[0])
-    print("\nThe most commonly used end location is {}.".format(end))
+    end = (df['End Station'].mode()[0])
 
     # display most frequent combination of start station and end station trip
-    sum_routes = df.groupby(['Start Station', 'End Station'])['Trip Duration'].count()
-    # pop_route = sum_routes.head(1)
-    print("\nThe most popular route is {}.".format(sum_routes.head(1)))
-    print("*****bug: table needs correct sorting enabled***************")
+    #TODO: add the count in its own column instead of using a mislabeled one
+    # sum_routes = df.groupby(['Start Station', 'End Station'])['Route Cnt'].value_counts()
+
+
+
+    print("The most commonly used start location is: \n{}\n".format(start))
+    print("The most commonly used end location is: \n{}\n".format(end))
+    # print("The most popular route is: \n{}\n".format(sum_routes.head()))
+    print("***missing most common trip****")
 
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
 
-
-# def trip_duration_stats(df):
+def trip_duration_stats(df):
     # """Displays statistics on the total and average trip duration."""
     #
-    # print('\nCalculating Trip Duration...\n')
-    # start_time = time.time()
-    #
-    # # display total travel time
-    #
-    #
-    # # display mean travel time
-    #
-    #
-    # print("\nThis took %s seconds." % (time.time() - start_time))
-    # print('-'*40)
+    print('\nCalculating Trip Duration...\n')
+    start_time = time.time()
+
+    sum_travel_time_sec = df['Trip Duration'].sum()
+    mean_travel_time_sec = df['Trip Duration'].mean()
+    max_travel_time_sec = df['Trip Duration'].max()
+    min_travel_time_sec = df['Trip Duration'].min()
+
+    print("Total time traveled (all riders): \t{} hours".format(int(sum_travel_time_sec/3600)))
+    print("Average time traveled for all riders: \t{} minutes {} seconds".format(
+    int(mean_travel_time_sec/60), int(mean_travel_time_sec%60)))
+    print("Longest ride: \t\t\t\t{} hours, {} minutes, {} seconds".format(
+    int(max_travel_time_sec/3600), int(max_travel_time_sec/60), int(max_travel_time_sec%60)))
+    print("Shortest ride: \t\t\t\t{} seconds".format(int(min_travel_time_sec)))
 
 
-# def user_stats(df):
+    print("\nThis took %s seconds." % (time.time() - start_time))
+    print('-'*40)
+
+def user_stats(df):
     # """Displays statistics on bikeshare users."""
-    #
-    # print('\nCalculating User Stats...\n')
-    # start_time = time.time()
-    #
+    print('\nCalculating User Stats...\n')
+    start_time = time.time()
+
     # # Display counts of user types
-    #
-    #
-    # # Display counts of gender
-    #
-    #
+    user_type_cnt = df['User Type'].value_counts()
+    user_gender_cnt = df['Gender'].value_counts()
     # # Display earliest, most recent, and most common year of birth
-    #
-    #
-    # print("\nThis took %s seconds." % (time.time() - start_time))
-    # print('-'*40)
-    #
+    oldest_rider = df['Birth Year'].min()
+    youngest_rider = df['Birth Year'].max()
+    most_common_rider_age = df['Birth Year'].mean()
+
+    print("User type summary: \n{}\n".format(user_type_cnt))
+    print("User gender summary: \n{}\n".format(user_gender_cnt))
+    print("Oldest rider / earliest year of birth): \n{} / {}\n".format(
+    int(THIS_YEAR - oldest_rider), int(oldest_rider)))
+    print("Youngest rider / most recent year of birth): \n{} / {}\n".format(
+    int(THIS_YEAR - youngest_rider), int(youngest_rider)))
+    print("Average rider age / most common year of birth): \n{} / {}\n".format(
+    int(THIS_YEAR - most_common_rider_age), int(most_common_rider_age)))
+
+
+    print("\nThis took %s seconds." % (time.time() - start_time))
+    print('-'*40)
+
+def step_through_data(df):
+    cnt = 0
+    print(df.head())
+    while True:
+        cnt = cnt + 5
+        # indices = [cnt, cnt+1, cnt+2, cnt+3, cnt+4]
+        print("Press 'y' for the next 5 entries:")
+        next_five = input()
+        if next_five.lower() == 'y':
+            print(df.iloc[cnt:cnt+5])
+            continue
+        else:
+            break
 
 def main():
     welcome_str ="""
@@ -286,9 +288,10 @@ def main():
 Please select what operation comes next:
 1.) Show time stats
 2.) Show Sation Stats
-3.) Show Rider Age Breakout
-4.) Show Trip Duration Breakout
-5.) Show User Stats
+3.) Show Trip Duration Breakout
+4.) Show User Stats
+5.) Step through all data (increments of 5)
+6.) See all data (will be truncated due to size of data)
 type 'q' to quit
 """
         while True:
@@ -302,27 +305,27 @@ type 'q' to quit
             elif selection == '2':
                 station_stats(df)
                 continue
+            elif selection == '3':
+                trip_duration_stats(df)
+                continue
+            elif selection == '4':
+                user_stats(df)
+                continue
+            elif selection == '5':
+                #TODO build a function that uses a counter and the head() method and its own loop for control
+                step_through_data(df)
+                continue
+            elif selection == '6':
+                print(df)
+                continue
             else:
                 print("It looks like we received an unexpected input: ", selection)
                 print("Please re-enter your number selection or htt q to quit")
                 continue
 
-        #TODO: ask user for
-
-        #3) Rider Age breakout
-        #4) Trip duration breakout
-        #5) User Stats: Type | Gender | Oldest, youngest, and most common age | Time to execute
-
-        # station_stats(df)
-        # trip_duration_stats(df)
-        # user_stats(df)
-
-        # print(df)
-
         restart = input('\nWould you like to query new data? Enter yes or no.\n')
         if restart.lower() != 'yes':
             break
-
 
 if __name__ == "__main__":
 	main()
