@@ -1,0 +1,14 @@
+Stats that the project is expecting:
+
+- most popular hour
+- trip duration
+- popular station
+- popular trip
+- user type (except for Washington)
+- gender
+- birth year
+
+- View individual record data?
+   - spits out five at a time
+
+

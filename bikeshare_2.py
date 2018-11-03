@@ -8,10 +8,6 @@ CITY_DATA = { 'chicago': 'chicago.csv',
 
 THIS_YEAR = 2018
 
-# This is probably a bad coding practice which I"m used to from Java
-# I had to learn how to use the global keyword to make this work
-user_data_available = True
-
 def int_to_month(num):
     # function that simplifies printing month integers to the console
     if num == 1:
@@ -49,11 +45,6 @@ def get_filters():
     while True:
         city = input().lower()
         if city == 'chicago' or city == 'new york city' or city == 'washington':
-            global user_data_available
-            if city == 'washington':
-                user_data_available = False  # Helps avoid a user query to Washington data
-            else:
-                user_data_available = True # this will reset the query if data is reloaded
             print("You selected ", city.title())
             break
         else:
@@ -64,7 +55,7 @@ def get_filters():
     print("Please type your desired month by name or number (ex: 'January' or '1') or 'all'")
     print("Note: Data is only available between January and June")
     while True:
-        month = input()
+        month = input().lower()
         # if this were C++ or Java, I'd vote for a switch statement.
         if month.lower() == 'january' or month == '1':
             month = 'January'
@@ -103,22 +94,22 @@ def get_filters():
     print("Please enter a number for your desired day of the week")
     print("Choose from the following: Su / 1, M / 2, Tu / 3, W / 4, Th / 5, F / 6, Sa / 7, or All")
     while True:
-        day = input()
-        if day.lower() == 'su' or day == '1':
+        day = input().lower()
+        if day == 'su' or day == '1':
             day = 'Sunday'
-        elif day.lower() == 'm' or day == '2':
+        elif day == 'm' or day == '2':
             day = 'Monday'
-        elif day.lower() == 'tu' or day == '3':
+        elif day == 'tu' or day == '3':
             day = 'Tuesday'
-        elif day.lower() == 'w' or day == '4':
+        elif day == 'w' or day == '4':
             day = 'Wednesday'
-        elif day.lower() == 'th' or day == '5':
+        elif day == 'th' or day == '5':
             day = 'Thursday'
-        elif day.lower() == 'f' or day == '6':
+        elif day == 'f' or day == '6':
             day = 'Friday'
-        elif day.lower() == 'sa' or day == '7':
+        elif day == 'sa' or day == '7':
             day = 'Saturday'
-        elif day.lower() == 'all':
+        elif day == 'all':
             day = 'all'
         else:
             print("It appears you picked a day outside our weekly range: ", day)
@@ -130,7 +121,6 @@ def get_filters():
     print("Input is valid, you provided: ", city, " | ", month, " | ", day)
     print('-'*40)
     return city, month, day
-
 
 def load_data(city, month, day):
 
@@ -235,21 +225,28 @@ def user_stats(df):
     start_time = time.time()
 
     # Display counts of user types
+    # This is outside the try block since we know this data exists
     user_type_cnt = df['User Type'].value_counts()
-    user_gender_cnt = df['Gender'].value_counts()
-    # Display earliest, most recent, and most common year of birth
-    oldest_rider = df['Birth Year'].min()
-    youngest_rider = df['Birth Year'].max()
-    most_common_rider_age = df['Birth Year'].mean()
-
     print("User type summary: \n{}\n".format(user_type_cnt))
-    print("User gender summary: \n{}\n".format(user_gender_cnt))
-    print("Oldest rider / earliest year of birth): \n{} / {}\n".format(
-    int(THIS_YEAR - oldest_rider), int(oldest_rider)))
-    print("Youngest rider / most recent year of birth): \n{} / {}\n".format(
-    int(THIS_YEAR - youngest_rider), int(youngest_rider)))
-    print("Average rider age / most common year of birth): \n{} / {}\n".format(
-    int(THIS_YEAR - most_common_rider_age), int(most_common_rider_age)))
+
+    # Per 1st submission feedback, the ideal solution for missing data
+    # is a try-except block
+    try:
+        user_gender_cnt = df['Gender'].value_counts()
+        # Display earliest, most recent, and most common year of birth
+        oldest_rider = df['Birth Year'].min()
+        youngest_rider = df['Birth Year'].max()
+        most_common_rider_age = df['Birth Year'].mean()
+        print("User gender summary: \n{}\n".format(user_gender_cnt))
+        print("Oldest rider / earliest year of birth): \n{} / {}\n".format(
+        int(THIS_YEAR - oldest_rider), int(oldest_rider)))
+        print("Youngest rider / most recent year of birth): \n{} / {}\n".format(
+        int(THIS_YEAR - youngest_rider), int(youngest_rider)))
+        print("Average rider age / most common year of birth): \n{} / {}\n".format(
+        int(THIS_YEAR - most_common_rider_age), int(most_common_rider_age)))
+    except KeyError:
+        print("It appears that this user query has no additional data")
+
 
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
@@ -316,16 +313,9 @@ type 'q' to quit
                 trip_duration_stats(df)
                 continue
             elif selection == '4':
-                global user_data_available
-                if user_data_available == True:
-                    user_stats(df)
-                    continue
-                else:
-                    print("There is currently no user data available for your city")
-                    print("Please select a different option")
-                    continue
+                user_stats(df)
+                continue
             elif selection == '5':
-                #TODO build a function that uses a counter and the head() method and its own loop for control
                 step_through_data(df)
                 continue
             elif selection == '6':
